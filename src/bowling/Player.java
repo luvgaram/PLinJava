@@ -7,42 +7,63 @@ public class Player {
 	private String name;
 	private Board board;
 		
-	protected void setId(PlayerId id) {
-		this.id = id;
-	}
-
-	protected boolean isSameId(PlayerId id) {
-		return this.id.equals(id);
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public PlayerId getId() {
-		return id;
-	}
-
-	public static Player create(PlayerId id, String name) {
+	// 팩토리 메소드
+	static Player create(PlayerId id, String name) {
 		return new Player(id, name);
 	}
 	
+	String getName() {
+		return name;
+	}
+	
+	String setName(String name) {
+		this.name = name;
+		return this.name;
+	}
+	
+	PlayerId getId() {
+		return id;
+	}
+	
+	void setBoard(ScoreNumber score) {
+		board.setFrame(score);
+	}
+	
+	ScoreNumber getBall(int turn, int ball) {
+		return board.getBall(turn, ball);
+	}
+	
+	int getFrameScore(int turn) {
+		return board.getFrameScore(turn);
+	}
+	
+	int getScore() {
+		return board.getCurrentScore();
+	}
+	
+	void printBoard() {
+		System.out.println("플레이어 이름: " + name + ", 점수 총합: " + getScore());
+		for (int i = 0; i < 10; i++) {
+			System.out.print("\t"+ i +"\t|");
+		}
+		System.out.println();
+		board.printFrames();
+		System.out.println();
+	}
+	
+	// 생성자 (팩토리 메소드로 전달)
 	private Player(PlayerId id, String name) {
 		this.id = id;
 		this.name = name;
 		board = new Board();
 	}
-
-	public void setBoard(ScoreNumber score) {
-		board.setFrame(score);
+	
+	protected void setId(PlayerId id) {
+		this.id = id;
 	}
-
-	public Board getBoard() {
-		return board;
+	
+	protected boolean isSameId(PlayerId id) {
+		return this.id.equals(id);
 	}
 	
 }

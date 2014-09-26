@@ -17,16 +17,11 @@ public class Board {
 		}
 	}
 	
-	int getCurrentFrame() {
-		return currentTurn;
-	}
-	
-	int getCurrentScore() {
-		return currentScore;
-	}
-
-	public void setFrame(ScoreNumber score) {
+	// 패키지 내부의 다른 클래스에서 접근하는 메소드 모음
+	void setFrame(ScoreNumber score) {
 		setScores(score);
+		setTotalScore();
+		
 		if (isFinalFrame()) {
 			setFinalFrame(score);
 			return;
@@ -35,10 +30,51 @@ public class Board {
 		setNotFinalFrame(score);
 	}
 	
+	ScoreNumber getBall(int turn, int ball) {
+		return frames[turn].getBall(ball);
+	}
+
+	int getFrameScore(int turn) {
+		return frames[turn].getTotalScore();
+	}
+	
+	int getCurrentFrame() {
+		return currentTurn;
+	}
+	
+	int getCurrentScore() {
+		return currentScore;
+	}
+	
+	void printFrames() {
+		for (int i = 0; i < currentTurn; i++) {
+			frames[i].printBalls();
+		}
+		System.out.println();
+		for (int i = 0; i < currentTurn; i++) {
+			System.out.print("\t"+frames[i].getTotalScore()+"\t|");
+		}
+	}
+	// 패키지 내부의 다른 클래스에서 접근하는 메소드 끝
+	
+	private void setTotalScore() {
+		int frameScoreTotal = 0;
+		for (int i = 0; i < frames.length; i++) {
+			frameScoreTotal += frames[i].getTotalScore();
+		}
+		currentScore = frameScoreTotal;
+	}
+	
 	private void setFinalFrame(ScoreNumber score) {
-//		System.out.println("프레임에 볼 세팅 " + "턴: " + currentTurn + " , 볼: "+ currentBall);
 		frames[currentTurn].setBall(score);
 		currentBall++;
+		if (isGameFinished()) {
+			currentTurn++;
+		}
+	}
+
+	private boolean isGameFinished() {
+		return (currentBall == 2 && frames[currentTurn].getFrameLength() == 2) || (currentBall == 3 && frames[currentTurn].getFrameLength() == 3);
 	}
 
 	private void setNotFinalFrame(ScoreNumber score) {
@@ -51,7 +87,6 @@ public class Board {
 
 	private void setFirstBall(ScoreNumber score) {
 		// 스트라이크면 턴을 증가하고 볼을 리셋
-//		System.out.println("프레임에 볼 세팅 " + "턴: " + currentTurn + " , 볼: "+ currentBall);
 		frames[currentTurn].setBall(score);
 		if(isStrike(score)) {
 			currentBall = 0;
@@ -63,7 +98,6 @@ public class Board {
 	}
 	
 	private void setSecondBall(ScoreNumber score) {
-//		System.out.println("프레임에 볼 세팅 " + "턴: " + currentTurn + " , 볼: "+ currentBall);
 		// 1투구와 2투구 합이 11이상이면 에러
 		if (isSummed(score) > 10) {
 			throw new IllegalArgumentException(String.format("1,2 투구 합계 10 이상을 던질 수 없다. 현재 값 : %d", isSummed(score)));
@@ -76,7 +110,6 @@ public class Board {
 		frames[currentTurn].setBall(score);
 		currentBall = 0;
 		currentTurn++;
-		
 	}
 	
 	private void setScores(ScoreNumber score) {
@@ -95,8 +128,8 @@ public class Board {
 	
 	// 마지막회 2번째 볼 점수 계산
 	private void setFinalFrameScores(ScoreNumber score) {
-		// 스트라이크거나 전회에 스페어면 전회에 더해줌
-		if (isStrike(score) || findPreviousStrike(currentTurn - 1)) {
+		// 전회가 스트라이크면 전회에 더해줌
+		if (findPreviousStrike(currentTurn - 1)) {
 			setTargetScore(score, currentTurn - 1);
 		}
 	}
@@ -131,17 +164,16 @@ public class Board {
 	
 	// 해당 턴이 스트라이크인지 확인
 	private boolean findPreviousStrike(int targetTurn) {
-		return frames[targetTurn].getBalls()[0].getNumber() == 10;
+		return frames[targetTurn].getBall(0).getNumber() == 10;
 	}
 	
 	// 해당 턴이 스페어인지 확인
 	private boolean findPreviousSpare(int targetTurn) {
-		ScoreNumber[] target = frames[targetTurn].getBalls();
-		return target[0].getNumber() + target[1].getNumber() == 10;
+		return frames[targetTurn].getBall(0).getNumber() + frames[targetTurn].getBall(1).getNumber() == 10;
 	}
 
 	private int isSummed(ScoreNumber score) {
-		return getFrame(currentTurn).getBalls()[0].getNumber() + score.getNumber();
+		return getFrame(currentTurn).getBall(0).getNumber() + score.getNumber();
 	}
 
 	private boolean isFirstBall() {
@@ -160,10 +192,6 @@ public class Board {
 		return score.getNumber() == 10;
 	}
 
-	private boolean isSpare(ScoreNumber score) {
-		return frames[currentTurn].getBalls()[0].getNumber() + score.getNumber() == 10;
-	}
-	
 	private boolean isFirstFrame() {
 		return currentTurn == 0;
 	}
@@ -172,7 +200,7 @@ public class Board {
 		return currentTurn == 9;
 	}
 	
-	public Frame getFrame(int turn) {
+	private Frame getFrame(int turn) {
 		return frames[turn];
 	}
 

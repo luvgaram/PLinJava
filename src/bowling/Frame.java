@@ -2,11 +2,28 @@ package bowling;
 
 import core.ScoreNumber;
 
-public class Frame {
+class Frame {
+	private static final int FINALFRAME = 9;
+	private static final int FULLSCORE = 10;
 	ScoreNumber[] numbers; // 각 투구의 점수를 담음
 	private int turn; // 프레임 번호 담음
-	private int ball; // 투구 횟수
 	private int totalScore; // 프레임 점수 합
+	// 투구 횟수
+	private enum Ball {
+		FIRST(0), SECOND(1), BONUS(2);
+		
+		private int symbol;
+		
+		private Ball(int symbol) {
+			this.symbol=symbol;
+		}
+		
+		private int convertToLength () {
+			return symbol + 1;
+		}
+	}
+	
+	private Ball ball;
 
 	// 패키지 내부의 다른 클래스에서 접근하는 메소드 모음
 	Frame(int turn) {
@@ -35,7 +52,7 @@ public class Frame {
 	}
 
 	private boolean isOverSpare(ScoreNumber score) {
-		return ball == 1 && numbers[0].getNumber() + score.getNumber() > 10;
+		return ball == Ball.SECOND && numbers[Ball.FIRST.symbol].getNumber() + score.getNumber() > FULLSCORE;
 	}
 	
 	int getTotalScore() {
@@ -67,7 +84,7 @@ public class Frame {
  	// 패키지 내부의 다른 클래스에서 접근하는 메소드 끝
 
 	private void printFinalFrame() {
-		for (int ball = 0; ball <numbers.length; ball++) {
+		for (int ball = Ball.FIRST.symbol; ball <numbers.length; ball++) {
 			if (isStrike(numbers[ball])) {
 				printStrike();
 				continue;
@@ -85,18 +102,18 @@ public class Frame {
 	}
 	
 	private void printNotFinalFrame() {
-		if (isStrike(numbers[0])) {
+		if (isStrike(numbers[Ball.FIRST.symbol])) {
 			printStrike();
 			System.out.print("  \t|");
 			return;
 		}
-		if (isSpare(numbers[1])) {
-			printNormalNumber(0);
+		if (isSpare(numbers[Ball.SECOND.symbol])) {
+			printNormalNumber(Ball.FIRST.symbol);
 			printSpare();
 			return;
 		}
-		printNormalNumber(0);
-		printNormalNumber(1);
+		printNormalNumber(Ball.FIRST.symbol);
+		printNormalNumber(Ball.SECOND.symbol);
 	}
 
 	private void printSpare() {
@@ -104,11 +121,11 @@ public class Frame {
 	}
 
 	private boolean isFinalSpare(int ball) {
-		return ball == 1 && numbers[ball - 1].getNumber() +numbers[ball].getNumber() == 10 && numbers[ball].getNumber() != 0;
+		return ball == Ball.SECOND.symbol && numbers[ball - 1].getNumber() +numbers[ball].getNumber() == FULLSCORE && numbers[ball].getNumber() != 0;
 	}
 
 	private boolean isFinalBonusBallSpare(int ball) {
-		return ball == 2 && numbers[ball - 1].getNumber() +numbers[ball].getNumber() == 10 && numbers[ball].getNumber() != 0 && !isFinalSpare(ball - 1);
+		return ball == Ball.BONUS.symbol && numbers[ball - 1].getNumber() +numbers[ball].getNumber() == FULLSCORE && numbers[ball].getNumber() != 0 && !isFinalSpare(ball - 1);
 	}
 	
 	private void printNormalNumber(int number) {
@@ -122,65 +139,74 @@ public class Frame {
 	// turn이 10이면 보너스인 3 ball 생성, 아니면 1,2 ball만 생성  
 	private void createDefaultFrame(int turn) {
 		this.turn = turn;
-		ball = 0;
+		ball = Ball.FIRST;
 		totalScore = 0;
 		
 		if (isFinalFrame(turn)) {
-			numbers = new ScoreNumber[3];
+			numbers = new ScoreNumber[Ball.BONUS.convertToLength()];
 			return;
 		}
-		numbers = new ScoreNumber[2];
+		numbers = new ScoreNumber[Ball.SECOND.convertToLength()];
 	}
 
 	private void setNotFinalFrame(ScoreNumber score) {
 		if (isStrike(score)) {
 			numbers = new ScoreNumber[numbers.length - 1];
-			numbers[ball] = score;
-			ball = 0;
+			numbers[ball.symbol] = score;
+			ball = Ball.FIRST;
 			return;
 		}
-		numbers[ball] = score;
-		ball++;
+		numbers[ball.symbol] = score;
+		increaseBall();
+	}
+
+	private void increaseBall() {
+		if (ball == Ball.FIRST) {
+			ball = Ball.SECOND;
+			return;
+		}
+		if (ball == Ball.SECOND) {
+			ball = Ball.BONUS;
+		}
 	}
 	
 	private void setFinalFrame(ScoreNumber score) {
 		// 1, 2번째 볼이 스트라이크이거나 스페어이면
-		if (ball == 1) {
+		if (ball == Ball.SECOND) {
 			if (isFirstBallStrike() || isStrike(score) || isSpare(score)) {
-				numbers[ball] = score;
-				ball++;
+				numbers[ball.symbol] = score;
+				increaseBall();
 				return;
 			}
 			// 스트라이크나 스페어에 실패했다면
-			ScoreNumber firstBall = numbers[0];
+			ScoreNumber firstBall = numbers[Ball.FIRST.symbol];
 			numbers = new ScoreNumber[2];
-			numbers[0] = firstBall;
-			numbers[1] = score;
-			ball++;
+			numbers[Ball.FIRST.symbol] = firstBall;
+			numbers[Ball.SECOND.symbol] = score;
+			increaseBall();
 			return;
 		}
-		numbers[ball] = score;
-		ball++;
+		numbers[ball.symbol] = score;
+		increaseBall();
 	}
 	
 	private boolean isFirstBallStrike() {
-		return numbers[0].getNumber() == 10;
+		return numbers[Ball.FIRST.symbol].getNumber() == FULLSCORE;
 	}
 
 	private boolean isSpare(ScoreNumber score) {
-		return numbers[0].getNumber() + score.getNumber() == 10;
+		return numbers[Ball.FIRST.symbol].getNumber() + score.getNumber() == FULLSCORE;
 	}
 	
 	private boolean isFinalFrame(int turn) {
-		return turn == 9;
+		return turn == FINALFRAME;
 	}
 
 	private boolean isStrike(ScoreNumber score) {
-		//return ball == 0 && 
-		return score.getNumber() == 10;
+		return score.getNumber() == FULLSCORE;
 	}
 
 	private boolean isAboveBallLimit() {
-		return ball >= numbers.length;
+		return ball.symbol >= numbers.length;
 	}
 }

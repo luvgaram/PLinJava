@@ -2,7 +2,7 @@ package bowling;
 
 import core.ScoreNumber;
 
-public class Player {
+class Player {
 	private PlayerId id;
 	private String name;
 	private Board board;
@@ -43,7 +43,7 @@ public class Player {
 	
 	void printBoard() {
 		System.out.println("플레이어 이름: " + name + ", 점수 총합: " + getScore());
-		for (int i = 0; i < 10; i++) {
+		for (int i = 1; i < 11; i++) {
 			System.out.print("\t"+ i +"\t|");
 		}
 		System.out.println();

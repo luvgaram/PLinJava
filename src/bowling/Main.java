@@ -62,18 +62,18 @@ public class Main {
 	}
 
 	private static int putBallScore(PlayerId targetId) {
-		System.out.print("쓰러트린 핀 갯수를 입력해주세요: ");
+		System.out.print("핀을 몇개 맞추셨나요?: ");
 		score = sc.nextInt();
 		bowling.playBall(targetId, new ScoreNumber(score));
 		return score;
 	}
 
 	private static void setPlayer(List<PlayerId> playerList, Bowling bowling) {
-		System.out.print("플레이어 인원 수를 입력해 주세요: ");
+		System.out.print("몇 분이 플레이하시나요?: ");
 		int numberOfPlayer = sc.nextInt();
 		
 		for (int i = 0; i < numberOfPlayer; i++) {
-			System.out.print(i+1 +" 번째 플레이어 이름을 입력해주세요: ");
+			System.out.print(i+1 +" 번째 손님, 이름을 입력해주세요: ");
 			sc = new Scanner(System.in);
 			String name = sc.nextLine();
 			playerList.add(bowling.addPlayer(name));

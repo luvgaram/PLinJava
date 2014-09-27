@@ -3,14 +3,31 @@ package bowling;
 import core.ScoreNumber;
 
 public class Board {
+	private static final int FINALFRAME = 9;
+	private static final int FULLSCORE = 10;
 	private int currentTurn;
-	private int currentBall;
+	private Ball currentBall;
 	private int currentScore;
 	private Frame[] frames;
+	
+	private enum Ball {
+		FIRST(0), SECOND(1), BONUS(2), FINISHED(3);
+		
+		private int symbol;
+		
+		private Ball(int symbol) {
+			this.symbol=symbol;
+		}
+		
+		private int convertToLength () {
+			return symbol + 1;
+		}
+	}
 	
 	Board() {
 		currentTurn = 0;
 		currentScore = 0;
+		currentBall = Ball.FIRST;
 		frames = new Frame[10];
 		for (int i = 0; i < frames.length; i++) {
 			frames[i] = new Frame(i);
@@ -67,14 +84,15 @@ public class Board {
 	
 	private void setFinalFrame(ScoreNumber score) {
 		frames[currentTurn].setBall(score);
-		currentBall++;
+		increaseBall();
 		if (isGameFinished()) {
 			currentTurn++;
 		}
 	}
 
 	private boolean isGameFinished() {
-		return (currentBall == 2 && frames[currentTurn].getFrameLength() == 2) || (currentBall == 3 && frames[currentTurn].getFrameLength() == 3);
+		return (currentBall == Ball.BONUS && frames[currentTurn].getFrameLength() == Ball.SECOND.convertToLength()) 
+				|| (currentBall == Ball.FINISHED && frames[currentTurn].getFrameLength() == Ball.BONUS.convertToLength());
 	}
 
 	private void setNotFinalFrame(ScoreNumber score) {
@@ -89,26 +107,26 @@ public class Board {
 		// 스트라이크면 턴을 증가하고 볼을 리셋
 		frames[currentTurn].setBall(score);
 		if(isStrike(score)) {
-			currentBall = 0;
+			currentBall = Ball.FIRST;
 			currentTurn++;
 			return;
 		}
 		// 스트라이크가 아니면 볼만 증가	
-		currentBall++;
+		increaseBall();
 	}
 	
 	private void setSecondBall(ScoreNumber score) {
 		// 1투구와 2투구 합이 11이상이면 에러
-		if (isSummed(score) > 10) {
+		if (isSummed(score) > FULLSCORE) {
 			throw new IllegalArgumentException(String.format("1,2 투구 합계 10 이상을 던질 수 없다. 현재 값 : %d", isSummed(score)));
 		}
 		// 1투구와 2투구 합이 10이면 = 스페어
-				if (isSummed(score) == 10) {
+				if (isSummed(score) == FULLSCORE) {
 					
 				}
 		// 1투구와 2투구 합이 9이하이면	
 		frames[currentTurn].setBall(score);
-		currentBall = 0;
+		currentBall = Ball.FIRST;
 		currentTurn++;
 	}
 	
@@ -162,14 +180,26 @@ public class Board {
 		frames[target].setTotalScore(score);
 	}
 	
+	private void increaseBall() {
+		if (currentBall == Ball.FIRST) {
+			currentBall = Ball.SECOND;
+			return;
+		}
+		if (currentBall == Ball.SECOND) {
+			currentBall = Ball.BONUS;
+			return;
+		}
+		currentBall = Ball.FINISHED;
+	}
+	
 	// 해당 턴이 스트라이크인지 확인
 	private boolean findPreviousStrike(int targetTurn) {
-		return frames[targetTurn].getBall(0).getNumber() == 10;
+		return frames[targetTurn].getBall(0).getNumber() == FULLSCORE;
 	}
 	
 	// 해당 턴이 스페어인지 확인
 	private boolean findPreviousSpare(int targetTurn) {
-		return frames[targetTurn].getBall(0).getNumber() + frames[targetTurn].getBall(1).getNumber() == 10;
+		return frames[targetTurn].getBall(0).getNumber() + frames[targetTurn].getBall(1).getNumber() == FULLSCORE;
 	}
 
 	private int isSummed(ScoreNumber score) {
@@ -177,19 +207,19 @@ public class Board {
 	}
 
 	private boolean isFirstBall() {
-		return currentBall == 0;
+		return currentBall == Ball.FIRST;
 	}
 	
 	private boolean isSecondBall() {
-		return currentBall == 1;
+		return currentBall == Ball.SECOND;
 	}
 
 	private boolean isBonusBall() {
-		return currentBall == 2;
+		return currentBall == Ball.BONUS;
 	}
 
 	private boolean isStrike(ScoreNumber score) {
-		return score.getNumber() == 10;
+		return score.getNumber() == FULLSCORE;
 	}
 
 	private boolean isFirstFrame() {
@@ -197,7 +227,7 @@ public class Board {
 	}
 	
 	private boolean isFinalFrame() {
-		return currentTurn == 9;
+		return currentTurn == FINALFRAME;
 	}
 	
 	private Frame getFrame(int turn) {

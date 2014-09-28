@@ -3,31 +3,14 @@ package bowling;
 import core.ScoreNumber;
 
 public class Board {
-	private static final int FINALFRAME = 9;
-	private static final int FULLSCORE = 10;
-	private int currentTurn;
-	private Ball currentBall;
 	private int currentScore;
 	private Frame[] frames;
 	
-	private enum Ball {
-		FIRST(0), SECOND(1), BONUS(2), FINISHED(3);
-		
-		private int symbol;
-		
-		private Ball(int symbol) {
-			this.symbol=symbol;
-		}
-		
-		private int convertToLength () {
-			return symbol + 1;
-		}
-	}
+	private PlayData boardData;
 	
 	Board() {
-		currentTurn = 0;
 		currentScore = 0;
-		currentBall = Ball.FIRST;
+		boardData = new PlayData(0, PlayData.Ball.FIRST);
 		frames = new Frame[10];
 		for (int i = 0; i < frames.length; i++) {
 			frames[i] = new Frame(i);
@@ -47,7 +30,7 @@ public class Board {
 		setNotFinalFrame(score);
 	}
 	
-	ScoreNumber getBall(int turn, int ball) {
+	ScoreNumber getBall(int turn, PlayData.Ball ball) {
 		return frames[turn].getBall(ball);
 	}
 
@@ -56,7 +39,7 @@ public class Board {
 	}
 	
 	int getCurrentFrame() {
-		return currentTurn;
+		return boardData.getTurn();
 	}
 	
 	int getCurrentScore() {
@@ -64,11 +47,11 @@ public class Board {
 	}
 	
 	void printFrames() {
-		for (int i = 0; i < currentTurn; i++) {
+		for (int i = 0; i < boardData.getTurn(); i++) {
 			frames[i].printBalls();
 		}
 		System.out.println();
-		for (int i = 0; i < currentTurn; i++) {
+		for (int i = 0; i < boardData.getTurn(); i++) {
 			System.out.print("\t"+frames[i].getTotalScore()+"\t|");
 		}
 	}
@@ -83,16 +66,18 @@ public class Board {
 	}
 	
 	private void setFinalFrame(ScoreNumber score) {
-		frames[currentTurn].setBall(score);
+		frames[boardData.getTurn()].setBall(score);
 		increaseBall();
 		if (isGameFinished()) {
-			currentTurn++;
+			boardData.increaseTurn();
 		}
 	}
 
 	private boolean isGameFinished() {
-		return (currentBall == Ball.BONUS && frames[currentTurn].getFrameLength() == Ball.SECOND.convertToLength()) 
-				|| (currentBall == Ball.FINISHED && frames[currentTurn].getFrameLength() == Ball.BONUS.convertToLength());
+		return (boardData.getBall() == PlayData.Ball.BONUS 
+					&& frames[boardData.getTurn()].getFrameLength() == PlayData.Ball.SECOND.convertToLength()) 
+				|| (boardData.getBall() == PlayData.Ball.FINISHED 
+					&& frames[boardData.getTurn()].getFrameLength() == PlayData.Ball.BONUS.convertToLength());
 	}
 
 	private void setNotFinalFrame(ScoreNumber score) {
@@ -105,33 +90,33 @@ public class Board {
 
 	private void setFirstBall(ScoreNumber score) {
 		// 스트라이크면 턴을 증가하고 볼을 리셋
-		frames[currentTurn].setBall(score);
+		frames[boardData.getTurn()].setBall(score);
 		if(isStrike(score)) {
-			currentBall = Ball.FIRST;
-			currentTurn++;
+			boardData.setBall(PlayData.Ball.FIRST);
+			boardData.increaseTurn();
 			return;
 		}
 		// 스트라이크가 아니면 볼만 증가	
-		increaseBall();
+		boardData.increaseBall();
 	}
 	
 	private void setSecondBall(ScoreNumber score) {
 		// 1투구와 2투구 합이 11이상이면 에러
-		if (isSummed(score) > FULLSCORE) {
+		if (isSummed(score) > PlayData.FULLSCORE) {
 			throw new IllegalArgumentException(String.format("1,2 투구 합계 10 이상을 던질 수 없다. 현재 값 : %d", isSummed(score)));
 		}
 		// 1투구와 2투구 합이 10이면 = 스페어
-				if (isSummed(score) == FULLSCORE) {
+				if (isSummed(score) == PlayData.FULLSCORE) {
 					
 				}
 		// 1투구와 2투구 합이 9이하이면	
-		frames[currentTurn].setBall(score);
-		currentBall = Ball.FIRST;
-		currentTurn++;
+		frames[boardData.getTurn()].setBall(score);
+		boardData.setBall(PlayData.Ball.FIRST);
+		boardData.increaseTurn();
 	}
 	
 	private void setScores(ScoreNumber score) {
-		frames[currentTurn].setTotalScore(score);
+		frames[boardData.getTurn()].setTotalScore(score);
 		// 첫회거나 마지막회의 보너스 볼이면
 		if (isFirstFrame() || isBonusBall()) {
 			return;
@@ -147,32 +132,36 @@ public class Board {
 	// 마지막회 2번째 볼 점수 계산
 	private void setFinalFrameScores(ScoreNumber score) {
 		// 전회가 스트라이크면 전회에 더해줌
-		if (findPreviousStrike(currentTurn - 1)) {
-			setTargetScore(score, currentTurn - 1);
+		if (findPreviousStrike(goPreviousFrame(1))) {
+			setTargetScore(score, goPreviousFrame(1));
 		}
+	}
+
+	private int goPreviousFrame(int target) {
+		return boardData.getTurn() - target;
 	}
 
 	private void setMiddleFrameScores(ScoreNumber score) {
 		// 전회가 스트라이크이면
-		if (findPreviousStrike(currentTurn - 1)) {
+		if (findPreviousStrike(goPreviousFrame(1))) {
 			setPreviousStrikeScore(score);
 			return;
 		}
 		
 		// 첫번째 투구고 전 프레임이 스페어면
-		if (isFirstBall() && findPreviousSpare(currentTurn - 1)) {
+		if (isFirstBall() && findPreviousSpare(goPreviousFrame(1))) {
 			// 이전 프레임에 현재 점수 더함
-			setTargetScore(score, currentTurn - 1);
+			setTargetScore(score, goPreviousFrame(1));
 		}
 	}
 
 	private void setPreviousStrikeScore(ScoreNumber score) {
 		// 전회의 점수에 현재 점수 더함
-		setTargetScore(score, currentTurn - 1);
+		setTargetScore(score, goPreviousFrame(1));
 		
 		// 첫번째 볼이고 전전회도 스트라이크면
-		if (isFirstBall() && currentTurn > 1 && findPreviousStrike(currentTurn - 2)) {
-			setTargetScore(score, currentTurn - 2);
+		if (isFirstBall() && boardData.getTurn() > 1 && findPreviousStrike(goPreviousFrame(2))) {
+			setTargetScore(score, boardData.getTurn() - 2);
 		}
 	}
 
@@ -181,53 +170,53 @@ public class Board {
 	}
 	
 	private void increaseBall() {
-		if (currentBall == Ball.FIRST) {
-			currentBall = Ball.SECOND;
+		if (boardData.getBall() == PlayData.Ball.FIRST) {
+			boardData.increaseBall();
 			return;
 		}
-		if (currentBall == Ball.SECOND) {
-			currentBall = Ball.BONUS;
+		if (boardData.getBall() == PlayData.Ball.SECOND) {
+			boardData.increaseBall();
 			return;
 		}
-		currentBall = Ball.FINISHED;
+		boardData.increaseBall();
 	}
 	
 	// 해당 턴이 스트라이크인지 확인
 	private boolean findPreviousStrike(int targetTurn) {
-		return frames[targetTurn].getBall(0).getNumber() == FULLSCORE;
+		return frames[targetTurn].getBall(PlayData.Ball.FIRST).getNumber() == PlayData.FULLSCORE;
 	}
 	
 	// 해당 턴이 스페어인지 확인
 	private boolean findPreviousSpare(int targetTurn) {
-		return frames[targetTurn].getBall(0).getNumber() + frames[targetTurn].getBall(1).getNumber() == FULLSCORE;
+		return frames[targetTurn].getBall(PlayData.Ball.FIRST).getNumber() + frames[targetTurn].getBall(PlayData.Ball.SECOND).getNumber() == PlayData.FULLSCORE;
 	}
 
 	private int isSummed(ScoreNumber score) {
-		return getFrame(currentTurn).getBall(0).getNumber() + score.getNumber();
+		return getFrame(boardData.getTurn()).getBall(PlayData.Ball.FIRST).getNumber() + score.getNumber();
 	}
 
 	private boolean isFirstBall() {
-		return currentBall == Ball.FIRST;
+		return boardData.getBall() == PlayData.Ball.FIRST;
 	}
 	
 	private boolean isSecondBall() {
-		return currentBall == Ball.SECOND;
+		return boardData.getBall() == PlayData.Ball.SECOND;
 	}
 
 	private boolean isBonusBall() {
-		return currentBall == Ball.BONUS;
+		return boardData.getBall() == PlayData.Ball.BONUS;
 	}
 
 	private boolean isStrike(ScoreNumber score) {
-		return score.getNumber() == FULLSCORE;
+		return score.getNumber() == PlayData.FULLSCORE;
 	}
 
 	private boolean isFirstFrame() {
-		return currentTurn == 0;
+		return boardData.getTurn() == 0;
 	}
 	
 	private boolean isFinalFrame() {
-		return currentTurn == FINALFRAME;
+		return boardData.getTurn() == PlayData.FINALFRAME;
 	}
 	
 	private Frame getFrame(int turn) {

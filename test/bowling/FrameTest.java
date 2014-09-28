@@ -22,6 +22,17 @@ public class FrameTest {
 		assertEquals(new ScoreNumber(4), sut.numbers[0]);
 		assertEquals(new ScoreNumber(6), sut.numbers[1]);
 	}
+	
+	@Test
+	public void 십점_이상은_기록하지_않는다() {
+		try {
+			Frame sut = new Frame(0);
+			sut.setBall(new ScoreNumber(11));
+			fail();
+		} catch (IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+		}
+	}
 
 	@Test
 	public void 지정_투구_이상은_기록하지_않는다() {

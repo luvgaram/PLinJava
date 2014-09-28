@@ -29,7 +29,7 @@ class Player {
 		board.setFrame(score);
 	}
 	
-	ScoreNumber getBall(int turn, int ball) {
+	ScoreNumber getBall(int turn, PlayData.Ball ball) {
 		return board.getBall(turn, ball);
 	}
 	

@@ -34,7 +34,7 @@ public class Bowling {
 		findPlayerById(id).setBoard(scoreNumber);
 	}
 	
-	public ScoreNumber getBall(PlayerId id, int turn, int ball) {
+	public ScoreNumber getBall(PlayerId id, int turn, PlayData.Ball ball) {
 		return findPlayerById(id).getBall(turn, ball);
 	}
 	

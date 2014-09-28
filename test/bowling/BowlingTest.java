@@ -2,6 +2,7 @@ package bowling;
 
 import org.junit.Assert;
 import org.junit.Test;
+
 import core.ScoreNumber;
 
 public class BowlingTest {
@@ -27,25 +28,22 @@ public class BowlingTest {
 		sut.playBall(newPlayerId, new ScoreNumber(3));
 		sut.playBall(newPlayerId, new ScoreNumber(4));
 		
-		Assert.assertEquals(new ScoreNumber(1), sut.getBall(newPlayerId, 0, 0));
-		Assert.assertEquals(new ScoreNumber(2), sut.getBall(newPlayerId, 0, 1));
-		Assert.assertEquals(new ScoreNumber(3), sut.getBall(newPlayerId, 1, 0));
-		Assert.assertEquals(new ScoreNumber(4), sut.getBall(newPlayerId, 1, 1));
+		Assert.assertEquals(new ScoreNumber(1), sut.getBall(newPlayerId, 0, PlayData.Ball.FIRST));
+		Assert.assertEquals(new ScoreNumber(2), sut.getBall(newPlayerId, 0, PlayData.Ball.SECOND));
+		Assert.assertEquals(new ScoreNumber(3), sut.getBall(newPlayerId, 1, PlayData.Ball.FIRST));
+		Assert.assertEquals(new ScoreNumber(4), sut.getBall(newPlayerId, 1, PlayData.Ball.SECOND));
 	}
 
 	@Test
 	public void 스트라이크면_다음_프레임으로_넘어간다() {
-		try {
 		sut.playBall(newPlayerId, new ScoreNumber(10));
 		sut.playBall(newPlayerId, new ScoreNumber(10));
 		sut.playBall(newPlayerId, new ScoreNumber(10));
-		} catch (ArrayIndexOutOfBoundsException e) {
-			System.out.println(e.getMessage());
-		} finally {
-		Assert.assertEquals(new ScoreNumber(10), sut.getBall(newPlayerId, 0, 0));
-		Assert.assertEquals(new ScoreNumber(10), sut.getBall(newPlayerId, 1, 0));
-		Assert.assertEquals(new ScoreNumber(10), sut.getBall(newPlayerId, 2, 0));
-		}
+
+		Assert.assertEquals(new ScoreNumber(10), sut.getBall(newPlayerId, 0, PlayData.Ball.FIRST));
+		Assert.assertEquals(new ScoreNumber(10), sut.getBall(newPlayerId, 1, PlayData.Ball.FIRST));
+		Assert.assertEquals(new ScoreNumber(10), sut.getBall(newPlayerId, 2, PlayData.Ball.FIRST));
+
 	}
 	
 	@Test
@@ -63,9 +61,9 @@ public class BowlingTest {
 		sut.playBall(newPlayerId, new ScoreNumber(2));
 		sut.playBall(newPlayerId, new ScoreNumber(3));
 
-		Assert.assertEquals(new ScoreNumber(10), sut.getBall(newPlayerId, 9, 0));
-		Assert.assertEquals(new ScoreNumber(2), sut.getBall(newPlayerId, 9, 1));
-		Assert.assertEquals(new ScoreNumber(3), sut.getBall(newPlayerId, 9, 2));
+		Assert.assertEquals(new ScoreNumber(10), sut.getBall(newPlayerId, 9, PlayData.Ball.FIRST));
+		Assert.assertEquals(new ScoreNumber(2), sut.getBall(newPlayerId, 9, PlayData.Ball.SECOND));
+		Assert.assertEquals(new ScoreNumber(3), sut.getBall(newPlayerId, 9, PlayData.Ball.BONUS));
 	}
 
 	@Test
@@ -83,9 +81,9 @@ public class BowlingTest {
 		sut.playBall(newPlayerId, new ScoreNumber(10));
 		sut.playBall(newPlayerId, new ScoreNumber(5));
 		
-		Assert.assertEquals(new ScoreNumber(10), sut.getBall(newPlayerId, 9, 0));
-		Assert.assertEquals(new ScoreNumber(10), sut.getBall(newPlayerId, 9, 1));
-		Assert.assertEquals(new ScoreNumber(5), sut.getBall(newPlayerId, 9, 2));
+		Assert.assertEquals(new ScoreNumber(10), sut.getBall(newPlayerId, 9, PlayData.Ball.FIRST));
+		Assert.assertEquals(new ScoreNumber(10), sut.getBall(newPlayerId, 9, PlayData.Ball.SECOND));
+		Assert.assertEquals(new ScoreNumber(5), sut.getBall(newPlayerId, 9, PlayData.Ball.BONUS));
 	}
 	
 	@Test
@@ -103,9 +101,9 @@ public class BowlingTest {
 		sut.playBall(newPlayerId, new ScoreNumber(9));
 		sut.playBall(newPlayerId, new ScoreNumber(5));
 		
-		Assert.assertEquals(new ScoreNumber(1), sut.getBall(newPlayerId, 9, 0));
-		Assert.assertEquals(new ScoreNumber(9), sut.getBall(newPlayerId, 9, 1));
-		Assert.assertEquals(new ScoreNumber(5), sut.getBall(newPlayerId, 9, 2));
+		Assert.assertEquals(new ScoreNumber(1), sut.getBall(newPlayerId, 9, PlayData.Ball.FIRST));
+		Assert.assertEquals(new ScoreNumber(9), sut.getBall(newPlayerId, 9, PlayData.Ball.SECOND));
+		Assert.assertEquals(new ScoreNumber(5), sut.getBall(newPlayerId, 9, PlayData.Ball.BONUS));
 	}
 	
 	@Test
@@ -128,8 +126,8 @@ public class BowlingTest {
 		} catch (ArrayIndexOutOfBoundsException e) {
 			System.out.println(e.getMessage());
 		}	finally {
-			Assert.assertEquals(new ScoreNumber(1), sut.getBall(newPlayerId, 9, 0));
-			Assert.assertEquals(new ScoreNumber(8), sut.getBall(newPlayerId, 9, 1));
+			Assert.assertEquals(new ScoreNumber(1), sut.getBall(newPlayerId, 9, PlayData.Ball.FIRST));
+			Assert.assertEquals(new ScoreNumber(8), sut.getBall(newPlayerId, 9, PlayData.Ball.SECOND));
 		}
 	}
 	

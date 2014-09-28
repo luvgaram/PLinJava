@@ -7,15 +7,24 @@ public class ScoreNumber {
 		if (number < 0) {
 			throw new IllegalArgumentException(String.format("점수는 0 이상이어야 한다. 현재 값 : %d", number));
 		}
-		if (number > 10) {
-			throw new IllegalArgumentException(String.format("점수는 11 이하여야 한다. 현재 값 : %d", number));
-		}
+//		if (number > 10) {
+//			throw new IllegalArgumentException(String.format("점수는 11 이하여야 한다. 현재 값 : %d", number));
+//		}
 		this.number = number;
 	}
 	
 	public int getNumber() {
 		return this.number;
 	}
+	
+	public ScoreNumber plus(ScoreNumber operand) {
+		return new ScoreNumber(this.number + operand.number);
+	}
+	
+	public Boolean overs(ScoreNumber operand) {
+		return this.number > operand.number;
+	}
+	
 
 	@Override
 	public int hashCode() {

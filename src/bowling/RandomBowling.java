@@ -51,7 +51,6 @@ public class RandomBowling extends Bowling {
 		Random generator = new Random();
 		int randomNumber = 0;
 		
-<<<<<<< HEAD
 		switch (randomPlayData.getBall().symbol) {
 		case 0 : randomNumber = generator.nextInt(11);
 					if (CheckScore.isStrike(new ScoreNumber(randomNumber)) 
@@ -92,45 +91,8 @@ public class RandomBowling extends Bowling {
 		return new ScoreNumber(randomNumber);
 	}
 
-	private int getTargetScore(PlayData.Ball target) {
-		return player.getBall(randomPlayData.getTurn(), target).getNumber();
-=======
-		switch (randomPlayData.ball.symbol) {
-			case 0 : randomNumber = generator.nextInt(11);
-						if (randomNumber == PlayData.FULLSCORE.getNumber() && randomPlayData.getTurn() != PlayData.FINALFRAME) {
-							randomPlayData.increaseTurn();
-							break;
-						}
-						randomPlayData.increaseBall();
-						break;
-			
-			case 1 : if (randomPlayData.getTurn() != PlayData.FINALFRAME)  {
-							randomNumber = generator.nextInt(11 - getFirstScore());
-							randomPlayData.increaseTurn();
-							randomPlayData.setBall(PlayData.Ball.FIRST);
-							break;
-						}
-						randomNumber = generator.nextInt(11);
-						randomPlayData.increaseBall();
-						break;
-			
-			case 2 : if (player.getBall(randomPlayData.getTurn(), PlayData.Ball.SECOND).equals(PlayData.FULLSCORE)) {
-								randomNumber = generator.nextInt(11);
-								randomPlayData.increaseBall();
-								break;
-						}
-						randomNumber = generator.nextInt(11 - getFirstScore());
-						randomPlayData.increaseBall();
-						break;
-			
-			default : randomNumber = 0;
-						break;
-		}
-		return new ScoreNumber(randomNumber);
-	}
+	private int getTargetScore(PlayData.Ball ball) {
+		return player.getBall(randomPlayData.getTurn(), ball).getNumber();
 
-	private int getFirstScore() {
-		return player.getBall(randomPlayData.getTurn(), PlayData.Ball.FIRST).getNumber();
->>>>>>> 4757f84d15750daf0ecf3fe90b36f6f5c297d7e8
 	}
 }

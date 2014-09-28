@@ -25,8 +25,9 @@ class Player {
 		return id;
 	}
 	
-	void setBoard(ScoreNumber score) {
+	ScoreNumber setBoard(ScoreNumber score) {
 		board.setFrame(score);
+		return score;
 	}
 	
 	ScoreNumber getBall(int turn, PlayData.Ball ball) {

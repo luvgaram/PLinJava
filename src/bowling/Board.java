@@ -102,11 +102,11 @@ public class Board {
 	
 	private void setSecondBall(ScoreNumber score) {
 		// 1투구와 2투구 합이 11이상이면 에러
-		if (isSummed(score) > PlayData.FULLSCORE) {
+		if (isSummed(score).overs(PlayData.FULLSCORE)) {
 			throw new IllegalArgumentException(String.format("1,2 투구 합계 10 이상을 던질 수 없다. 현재 값 : %d", isSummed(score)));
 		}
 		// 1투구와 2투구 합이 10이면 = 스페어
-				if (isSummed(score) == PlayData.FULLSCORE) {
+				if (isSummed(score).equals(PlayData.FULLSCORE)) {
 					
 				}
 		// 1투구와 2투구 합이 9이하이면	
@@ -183,16 +183,16 @@ public class Board {
 	
 	// 해당 턴이 스트라이크인지 확인
 	private boolean findPreviousStrike(int targetTurn) {
-		return frames[targetTurn].getBall(PlayData.Ball.FIRST).getNumber() == PlayData.FULLSCORE;
+		return frames[targetTurn].getBall(PlayData.Ball.FIRST).equals(PlayData.FULLSCORE);
 	}
 	
 	// 해당 턴이 스페어인지 확인
 	private boolean findPreviousSpare(int targetTurn) {
-		return frames[targetTurn].getBall(PlayData.Ball.FIRST).getNumber() + frames[targetTurn].getBall(PlayData.Ball.SECOND).getNumber() == PlayData.FULLSCORE;
+		return (frames[targetTurn].getBall(PlayData.Ball.FIRST).plus(frames[targetTurn].getBall(PlayData.Ball.SECOND))).equals(PlayData.FULLSCORE);
 	}
 
-	private int isSummed(ScoreNumber score) {
-		return getFrame(boardData.getTurn()).getBall(PlayData.Ball.FIRST).getNumber() + score.getNumber();
+	private ScoreNumber isSummed(ScoreNumber score) {
+		return getFrame(boardData.getTurn()).getBall(PlayData.Ball.FIRST).plus(score);
 	}
 
 	private boolean isFirstBall() {
@@ -208,7 +208,7 @@ public class Board {
 	}
 
 	private boolean isStrike(ScoreNumber score) {
-		return score.getNumber() == PlayData.FULLSCORE;
+		return score.equals(PlayData.FULLSCORE);
 	}
 
 	private boolean isFirstFrame() {

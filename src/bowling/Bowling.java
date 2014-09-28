@@ -17,7 +17,7 @@ public class Bowling {
 	}
 
 	// 트리 맵에서 플레이어 아이디로 플레이어를 찾아줌 
-	private Player findPlayerById(PlayerId id) {
+	protected Player findPlayerById(PlayerId id) {
 		return Players.get(id);
 	}
 	

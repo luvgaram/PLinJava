@@ -19,15 +19,16 @@ class Frame {
 		if (isAboveBallLimit()) {
 			throw new IllegalArgumentException(String.format("지정 볼 이상을 던질 수 없다. 현재 값 : %d", frameData.ball.symbol));
 		}
+
+		// 10점 이상을 던지려고 하면
+		if (isOverEleven(score)) {
+			throw new IllegalArgumentException(String.format("십 이상을 던질 수 없다. 현재 값 : %d", score));
+		}
+		
 		// 마지막 프레임이면
 		if (isFinalFrame(frameData.getTurn())) {
 			setFinalFrame(score);
 			return;
-		}
-		
-		// 10점 이상을 던지려고 하면
-		if (isOverEleven(score)) {
-			throw new IllegalArgumentException(String.format("십 이상을 던질 수 없다. 현재 값 : %d", score));
 		}
 		
 		// 스페어 이상을 던지려고 하면
@@ -40,12 +41,12 @@ class Frame {
 	}
 	
 	private boolean isOverEleven(ScoreNumber score) {
-		return score.overs(PlayData.FULLSCORENUMBER);
+		return score.overs(PlayData.FULLSCORE);
 	}
 
 	private boolean isOverSpare(ScoreNumber score) {
 		return (frameData.getBall() == PlayData.Ball.SECOND) 
-				&& (numbers[PlayData.Ball.FIRST.symbol].plus(score).overs(PlayData.FULLSCORENUMBER));
+				&& (numbers[PlayData.Ball.FIRST.symbol].plus(score).overs(PlayData.FULLSCORE));
 	}
 	
 	int getTotalScore() {
@@ -115,13 +116,13 @@ class Frame {
 
 	private boolean isFinalSpare(int ball) {
 		return ball == PlayData.Ball.SECOND.symbol 
-				&& numbers[ball - 1].plus(numbers[ball]).equals(PlayData.FULLSCORENUMBER) 
+				&& numbers[ball - 1].plus(numbers[ball]).equals(PlayData.FULLSCORE) 
 				&& !numbers[ball].equals(new ScoreNumber(0));
 	}
 
 	private boolean isFinalBonusBallSpare(int ball) {
 		return ball == PlayData.Ball.BONUS.symbol 
-				&& numbers[ball - 1].plus(numbers[ball]).equals(PlayData.FULLSCORENUMBER)
+				&& numbers[ball - 1].plus(numbers[ball]).equals(PlayData.FULLSCORE)
 				&& !numbers[ball].equals(new ScoreNumber(0)) 
 				&& !isFinalSpare(ball - 1);
 	}
@@ -149,8 +150,8 @@ class Frame {
 	private void setNotFinalFrame(ScoreNumber score) {
 		if (isStrike(score)) {
 			numbers = new ScoreNumber[numbers.length - 1];
-			numbers[frameData.ball.symbol] = score;
-			frameData.ball =PlayData.Ball.FIRST;
+			numbers[PlayData.Ball.FIRST.symbol] = score;
+			frameData.setBall(PlayData.Ball.FIRST);
 			return;
 		}
 		numbers[frameData.ball.symbol] = score;
@@ -159,11 +160,11 @@ class Frame {
 
 	private void increaseBall() {
 		if (frameData.ball == PlayData.Ball.FIRST) {
-			frameData.ball = PlayData.Ball.SECOND;
+			frameData.setBall(PlayData.Ball.SECOND);
 			return;
 		}
 		if (frameData.ball == PlayData.Ball.SECOND) {
-			frameData.ball = PlayData.Ball.BONUS;
+			frameData.setBall(PlayData.Ball.BONUS);
 		}
 	}
 	
@@ -188,11 +189,11 @@ class Frame {
 	}
 	
 	private boolean isFirstBallStrike() {
-		return numbers[PlayData.Ball.FIRST.symbol].equals(PlayData.FULLSCORENUMBER);
+		return numbers[PlayData.Ball.FIRST.symbol].equals(PlayData.FULLSCORE);
 	}
 
 	private boolean isSpare(ScoreNumber score) {
-		return numbers[PlayData.Ball.FIRST.symbol].plus(score).equals(PlayData.FULLSCORENUMBER);
+		return numbers[PlayData.Ball.FIRST.symbol].plus(score).equals(PlayData.FULLSCORE);
 	}
 	
 	private boolean isFinalFrame(int turn) {
@@ -200,7 +201,7 @@ class Frame {
 	}
 
 	private boolean isStrike(ScoreNumber score) {
-		return score.equals(PlayData.FULLSCORENUMBER);
+		return score.equals(PlayData.FULLSCORE);
 	}
 
 	private boolean isAboveBallLimit() {

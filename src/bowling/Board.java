@@ -22,7 +22,7 @@ public class Board {
 		setScores(score);
 		setTotalScore();
 		
-		if (isFinalFrame()) {
+		if (CheckScore.isFinalFrame(boardData)) {
 			setFinalFrame(score);
 			return;
 		}
@@ -67,7 +67,7 @@ public class Board {
 	
 	private void setFinalFrame(ScoreNumber score) {
 		frames[boardData.getTurn()].setBall(score);
-		increaseBall();
+		boardData.increaseBall();
 		if (isGameFinished()) {
 			boardData.increaseTurn();
 		}
@@ -81,7 +81,7 @@ public class Board {
 	}
 
 	private void setNotFinalFrame(ScoreNumber score) {
-		if(isFirstBall()) {
+		if(CheckScore.isFirstBall(boardData)) {
 			setFirstBall(score);
 			return;
 		}
@@ -91,7 +91,7 @@ public class Board {
 	private void setFirstBall(ScoreNumber score) {
 		// 스트라이크면 턴을 증가하고 볼을 리셋
 		frames[boardData.getTurn()].setBall(score);
-		if(isStrike(score)) {
+		if(CheckScore.isStrike(score)) {
 			boardData.setBall(PlayData.Ball.FIRST);
 			boardData.increaseTurn();
 			return;
@@ -118,11 +118,11 @@ public class Board {
 	private void setScores(ScoreNumber score) {
 		frames[boardData.getTurn()].setTotalScore(score);
 		// 첫회거나 마지막회의 보너스 볼이면
-		if (isFirstFrame() || isBonusBall()) {
+		if (CheckScore.isFirstFrame(boardData) || CheckScore.isBonusBall(boardData)) {
 			return;
 		}
 		// 마지막회 두번째 볼이면
-		if (isFinalFrame() && isSecondBall()) {
+		if (CheckScore.isFinalFrame(boardData) && CheckScore.isSecondBall(boardData)) {
 			setFinalFrameScores(score);
 			return;
 		}
@@ -149,7 +149,7 @@ public class Board {
 		}
 		
 		// 첫번째 투구고 전 프레임이 스페어면
-		if (isFirstBall() && findPreviousSpare(goPreviousFrame(1))) {
+		if (CheckScore.isFirstBall(boardData) && findPreviousSpare(goPreviousFrame(1))) {
 			// 이전 프레임에 현재 점수 더함
 			setTargetScore(score, goPreviousFrame(1));
 		}
@@ -160,7 +160,7 @@ public class Board {
 		setTargetScore(score, goPreviousFrame(1));
 		
 		// 첫번째 볼이고 전전회도 스트라이크면
-		if (isFirstBall() && boardData.getTurn() > 1 && findPreviousStrike(goPreviousFrame(2))) {
+		if (CheckScore.isFirstBall(boardData) && boardData.getTurn() > 1 && findPreviousStrike(goPreviousFrame(2))) {
 			setTargetScore(score, boardData.getTurn() - 2);
 		}
 	}
@@ -168,19 +168,7 @@ public class Board {
 	private void setTargetScore(ScoreNumber score, int target) {
 		frames[target].setTotalScore(score);
 	}
-	
-	private void increaseBall() {
-		if (boardData.getBall() == PlayData.Ball.FIRST) {
-			boardData.increaseBall();
-			return;
-		}
-		if (boardData.getBall() == PlayData.Ball.SECOND) {
-			boardData.increaseBall();
-			return;
-		}
-		boardData.increaseBall();
-	}
-	
+
 	// 해당 턴이 스트라이크인지 확인
 	private boolean findPreviousStrike(int targetTurn) {
 		return frames[targetTurn].getBall(PlayData.Ball.FIRST).equals(PlayData.FULLSCORE);
@@ -195,30 +183,6 @@ public class Board {
 		return getFrame(boardData.getTurn()).getBall(PlayData.Ball.FIRST).plus(score);
 	}
 
-	private boolean isFirstBall() {
-		return boardData.getBall() == PlayData.Ball.FIRST;
-	}
-	
-	private boolean isSecondBall() {
-		return boardData.getBall() == PlayData.Ball.SECOND;
-	}
-
-	private boolean isBonusBall() {
-		return boardData.getBall() == PlayData.Ball.BONUS;
-	}
-
-	private boolean isStrike(ScoreNumber score) {
-		return score.equals(PlayData.FULLSCORE);
-	}
-
-	private boolean isFirstFrame() {
-		return boardData.getTurn() == 0;
-	}
-	
-	private boolean isFinalFrame() {
-		return boardData.getTurn() == PlayData.FINALFRAME;
-	}
-	
 	private Frame getFrame(int turn) {
 		return frames[turn];
 	}

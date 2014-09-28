@@ -29,13 +29,13 @@ public class RandomBowling extends Bowling {
 		}
 
 		ScoreNumber first = player.setBoard(generateRandomScore());
-		if (first.equals(PlayData.FULLSCORE)) {
+		if (CheckScore.isStrike(first)) {
 			player.setBoard(generateRandomScore());
 			player.setBoard(generateRandomScore());
 			return;
 		}
 		ScoreNumber second = player.setBoard(generateRandomScore());
-		if (second.equals(PlayData.FULLSCORE) || first.plus(second).equals(PlayData.FULLSCORE)) {
+		if (CheckScore.isStrike(second) || CheckScore.isSpare(first, second)) {
 			player.setBoard(generateRandomScore());
 			return;
 		}

@@ -26,7 +26,7 @@ class Frame {
 		}
 		
 		// 마지막 프레임이면
-		if (isFinalFrame(frameData.getTurn())) {
+		if (CheckScore.isFinalFrame(frameData)) {
 			setFinalFrame(score);
 			return;
 		}
@@ -63,7 +63,7 @@ class Frame {
 	
 	void printBalls() {
 		// 마지막 프레임이 아니면
-		if (!isFinalFrame(frameData.turn)) {
+		if (!CheckScore.isFinalFrame(frameData)) {
 			printNotFinalFrame();
 			return;
 		}
@@ -79,7 +79,7 @@ class Frame {
 
 	private void printFinalFrame() {
 		for (int ball = PlayData.Ball.FIRST.symbol; ball <numbers.length; ball++) {
-			if (isStrike(numbers[ball])) {
+			if (CheckScore.isStrike(numbers[ball])) {
 				printStrike();
 				continue;
 			}
@@ -96,12 +96,12 @@ class Frame {
 	}
 	
 	private void printNotFinalFrame() {
-		if (isStrike(numbers[PlayData.Ball.FIRST.symbol])) {
+		if (CheckScore.isStrike(numbers[PlayData.Ball.FIRST.symbol])) {
 			printStrike();
 			System.out.print("  \t|");
 			return;
 		}
-		if (isSpare(numbers[PlayData.Ball.SECOND.symbol])) {
+		if (CheckScore.isSpare(numbers[PlayData.Ball.FIRST.symbol], numbers[PlayData.Ball.SECOND.symbol])) {
 			printNormalNumber(PlayData.Ball.FIRST.symbol);
 			printSpare();
 			return;
@@ -140,7 +140,7 @@ class Frame {
 		frameData = new PlayData(turn, PlayData.Ball.FIRST);
 		totalScore = 0;
 		
-		if (isFinalFrame(frameData.getTurn())) {
+		if (CheckScore.isFinalFrame(frameData)) {
 			numbers = new ScoreNumber[PlayData.Ball.BONUS.convertToLength()];
 			return;
 		}
@@ -148,60 +148,39 @@ class Frame {
 	}
 
 	private void setNotFinalFrame(ScoreNumber score) {
-		if (isStrike(score)) {
+		if (CheckScore.isStrike(score)) {
 			numbers = new ScoreNumber[numbers.length - 1];
 			numbers[PlayData.Ball.FIRST.symbol] = score;
 			frameData.setBall(PlayData.Ball.FIRST);
 			return;
 		}
 		numbers[frameData.ball.symbol] = score;
-		increaseBall();
+		frameData.increaseBall();
 	}
 
-	private void increaseBall() {
-		if (frameData.ball == PlayData.Ball.FIRST) {
-			frameData.setBall(PlayData.Ball.SECOND);
-			return;
-		}
-		if (frameData.ball == PlayData.Ball.SECOND) {
-			frameData.setBall(PlayData.Ball.BONUS);
-		}
-	}
-	
 	private void setFinalFrame(ScoreNumber score) {
 		// 1, 2번째 볼이 스트라이크이거나 스페어이면
-		if (frameData.ball == PlayData.Ball.SECOND) {
-			if (isFirstBallStrike() || isStrike(score) || isSpare(score)) {
-				numbers[frameData.ball.symbol] = score;
-				increaseBall();
-				return;
-			}
-			// 스트라이크나 스페어에 실패했다면
-			ScoreNumber firstBall = numbers[PlayData.Ball.FIRST.symbol];
-			numbers = new ScoreNumber[2];
-			numbers[PlayData.Ball.FIRST.symbol] = firstBall;
-			numbers[PlayData.Ball.SECOND.symbol] = score;
-			increaseBall();
+		if (CheckScore.isSecondBall(frameData)) {
+			setBonusBall(score);
 			return;
 		}
 		numbers[frameData.ball.symbol] = score;
-		increaseBall();
-	}
-	
-	private boolean isFirstBallStrike() {
-		return numbers[PlayData.Ball.FIRST.symbol].equals(PlayData.FULLSCORE);
+		frameData.increaseBall();
 	}
 
-	private boolean isSpare(ScoreNumber score) {
-		return numbers[PlayData.Ball.FIRST.symbol].plus(score).equals(PlayData.FULLSCORE);
-	}
-	
-	private boolean isFinalFrame(int turn) {
-		return turn == PlayData.FINALFRAME;
-	}
-
-	private boolean isStrike(ScoreNumber score) {
-		return score.equals(PlayData.FULLSCORE);
+	private void setBonusBall(ScoreNumber score) {
+		if (CheckScore.isStrike(numbers[PlayData.Ball.FIRST.symbol])|| CheckScore.isStrike(score) || CheckScore.isSpare(numbers[PlayData.Ball.FIRST.symbol], score)) {
+			numbers[frameData.ball.symbol] = score;
+			frameData.increaseBall();
+			return;
+		}
+		// 스트라이크나 스페어에 실패했다면
+		ScoreNumber firstBall = numbers[PlayData.Ball.FIRST.symbol];
+		numbers = new ScoreNumber[2];
+		numbers[PlayData.Ball.FIRST.symbol] = firstBall;
+		numbers[PlayData.Ball.SECOND.symbol] = score;
+		frameData.increaseBall();
+		return;
 	}
 
 	private boolean isAboveBallLimit() {

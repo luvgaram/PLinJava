@@ -21,7 +21,6 @@ public class RandomBowling extends Bowling {
 	@Override
 	public void printPlayer(PlayerId id) {
 		this.printPlayer();
-		//throw new UnsupportedOperationException("RandomBowling은 playPlayer 메서드에 id argument를 사용하지 않는다.");
 	}
 	
 	public void playBall() {
@@ -46,7 +45,6 @@ public class RandomBowling extends Bowling {
 	@Override
 	public void playBall(PlayerId id, ScoreNumber scoreNumber) {
 		this.playBall();
-		//throw new UnsupportedOperationException("RandomBowling은 playBall 메서드에 id argument를 사용하지 않는다.");
 	}
 	
 	ScoreNumber generateRandomScore() {
@@ -63,7 +61,7 @@ public class RandomBowling extends Bowling {
 						break;
 			
 			case 1 : if (randomPlayData.getTurn() != PlayData.FINALFRAME)  {
-							randomNumber = generator.nextInt(11 - player.getBall(randomPlayData.getTurn(), PlayData.Ball.FIRST).getNumber());
+							randomNumber = generator.nextInt(11 - getFirstScore());
 							randomPlayData.increaseTurn();
 							randomPlayData.setBall(PlayData.Ball.FIRST);
 							break;
@@ -77,7 +75,7 @@ public class RandomBowling extends Bowling {
 								randomPlayData.increaseBall();
 								break;
 						}
-						randomNumber = generator.nextInt(11 - player.getBall(randomPlayData.getTurn(), PlayData.Ball.FIRST).getNumber());
+						randomNumber = generator.nextInt(11 - getFirstScore());
 						randomPlayData.increaseBall();
 						break;
 			
@@ -85,5 +83,9 @@ public class RandomBowling extends Bowling {
 						break;
 		}
 		return new ScoreNumber(randomNumber);
+	}
+
+	private int getFirstScore() {
+		return player.getBall(randomPlayData.getTurn(), PlayData.Ball.FIRST).getNumber();
 	}
 }

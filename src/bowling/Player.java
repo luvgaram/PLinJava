@@ -43,7 +43,7 @@ class Player {
 	}
 	
 	void printBoard() {
-		System.out.println("플레이어 이름: " + name + ", 점수 총합: " + getScore());
+		System.out.println("이름: " + name + ", 점수 총합: " + getScore());
 		for (int i = 1; i < 11; i++) {
 			System.out.print("\t"+ i +"\t|");
 		}

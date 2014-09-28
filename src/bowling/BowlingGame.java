@@ -7,6 +7,7 @@ import java.util.Scanner;
 import core.ScoreNumber;
 
 public class BowlingGame {
+	private static final int RANDOM = 1;
 	List<PlayerId> playerList = new ArrayList<PlayerId>();
 	Scanner sc = new Scanner(System.in);
 	Bowling bowling;
@@ -22,7 +23,7 @@ public class BowlingGame {
 		System.out.print("랜덤 점수판을 보시려면 1을, 매뉴얼로 점수를 입력하시려면 2를 입력해주세요:  ");
 		selectGame = sc.nextInt();
 		
-		if (selectGame == 1) {
+		if (selectGame == RANDOM) {
 			System.out.println("랜덤 점수판을 생성합니다.");
 			bowling = new RandomBowling();
 			return;
@@ -32,7 +33,7 @@ public class BowlingGame {
 	}
 
 	void playGame() {
-		if (selectGame == 1) {
+		if (selectGame == RANDOM) {
 			bowling.playBall(null, null);
 			bowling.printPlayer(null);
 			return;

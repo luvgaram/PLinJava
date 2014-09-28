@@ -41,10 +41,13 @@ public class PlayData {
 		this.ball = ball;
 	}
 	
+<<<<<<< HEAD
 	void resetBall() {
 		this.ball = Ball.FIRST;
 	}
 	
+=======
+>>>>>>> 4757f84d15750daf0ecf3fe90b36f6f5c297d7e8
 	int getBallNumber() {
 		return ball.symbol;
 	}
